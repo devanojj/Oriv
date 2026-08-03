@@ -36,7 +36,13 @@ public final class AppViewModel {
     }()
     
     public init(healthKitManager: HealthKitManager? = nil) {
-        self.healthKitManager = healthKitManager ?? HealthKitManager()
+        let manager = healthKitManager ?? HealthKitManager()
+        self.healthKitManager = manager
+        
+        // Automatically recalculate readiness score whenever HealthKitManager receives background updates
+        manager.onDataUpdated = { [weak self] in
+            self?.processHealthData()
+        }
     }
     
     /// Requests HealthKit authorization (if needed), fetches 90-day data, and calculates readiness score.

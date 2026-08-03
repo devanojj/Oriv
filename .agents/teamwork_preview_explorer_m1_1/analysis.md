@@ -1,3 +1,134 @@
+# Milestone 1 Implementation Strategy: HealthKit Background Observer & Delivery
+
+## Executive Summary
+
+This report establishes the complete, production-grade implementation strategy for **Milestone 1 (HealthKit Background Observer & Delivery in `HealthKitManager.swift`)** for **Oriv**. 
+
+Milestone 1 transforms `HealthKitManager` from an on-demand manual fetch utility into an automated, background-reactive HealthKit manager. The implementation adds persistent `HKObserverQuery` observers, background delivery enablement with `.immediate` frequency for all 4 target biometrics, an explicit `fetchAllMetrics()` async method, task deduplication for overlapping updates, an `@MainActor` callback hook `onDataUpdated`, and safe thread-hopping for Swift 6 strict concurrency while guaranteeing deterministic invocation of HealthKit's background completion handlers.
+
+---
+
+## 1. Core Requirements & Interface Contracts (Milestone 1)
+
+### Requirements Mapping (R1)
+1. **Background Observer Queries**: Register `HKObserverQuery` for:
+   - `.heartRateVariabilitySDNN` (Quantity Type)
+   - `.restingHeartRate` (Quantity Type)
+   - `.sleepAnalysis` (Category Type)
+   - `.activeEnergyBurned` (Quantity Type)
+2. **Background Delivery Enablement**: Enable background delivery via `healthStore.enableBackgroundDelivery(for: sampleType, frequency: .immediate)` for all 4 sample types.
+3. **Async Fetch Methods**: Expose `fetchAllMetrics() async` as the primary fetch API and retain `fetch90DayHealthData() async` as a backward-compatible wrapper/alias.
+4. **Thread Hopping & Completion Handling**: Safely transition background observer callbacks to `@MainActor`, invoke `onDataUpdated?()`, and reliably call `completionHandler()` after query execution.
+
+### Public Interface Contracts (`HealthKitManager.swift`)
+
+```swift
+@Observable
+@MainActor
+public final class HealthKitManager {
+    // Reactive callback hook for AppViewModel (M2)
+    public var onDataUpdated: (@MainActor () async -> Void)? = nil
+    
+    // Authorization & Background Management
+    public func requestAuthorization() async throws
+    public func startObservingBackgroundUpdates() async
+    public func stopObservingBackgroundUpdates()
+    
+    // Async Metric Fetching APIs
+    public func fetchAllMetrics() async
+    public func fetch90DayHealthData() async
+}
+```
+
+---
+
+## 2. Detailed Technical Design & Architecture
+
+### A. Sample Types & Metric Catalog
+To keep the codebase DRY and maintainable, sample types are defined via a consolidated computed property:
+
+```swift
+private var sampleTypesToObserve: [HKSampleType] {
+    var types: [HKSampleType] = []
+    if let hrv = HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN) { types.append(hrv) }
+    if let rhr = HKObjectType.quantityType(forIdentifier: .restingHeartRate) { types.append(rhr) }
+    if let energy = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned) { types.append(energy) }
+    if let sleep = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) { types.append(sleep) }
+    return types
+}
+
+private var readTypes: Set<HKObjectType> {
+    Set(sampleTypesToObserve)
+}
+```
+
+### B. Observer Query Registration & Background Delivery
+1. **Observer Storage**: `private var activeObserverQueries: [HKObserverQuery] = []` holds references to active queries on `@MainActor`.
+2. **Teardown**: `stopObservingBackgroundUpdates()` iterates through `activeObserverQueries`, invokes `healthStore.stop(query)`, and clears the array.
+3. **Registration Flow (`startObservingBackgroundUpdates() async`)**:
+   - Checks `guard isAuthorized else { return }`.
+   - Clears existing queries via `stopObservingBackgroundUpdates()`.
+   - For each `sampleType` in `sampleTypesToObserve`:
+     a. Attempts `healthStore.enableBackgroundDelivery(for: sampleType, frequency: .immediate)` wrapped in a `do-catch` block (logs warnings if unsupported or failing on Simulator).
+     b. Constructs an `HKObserverQuery`.
+     c. Calls `healthStore.execute(query)` and appends to `activeObserverQueries`.
+
+### C. Concurrency, Actor Isolation & Completion Handler Safety
+- `HealthKitManager` is `@MainActor` isolated.
+- `HKObserverQuery` update handlers execute on arbitrary background dispatch queues managed by iOS system processes (`healthd`).
+- **Completion Handler Rule**: iOS allocates limited background runtime when delivering updates. The app **must** execute `completionHandler()` when background processing is complete. Failure to call it leads to background delivery throttling or process termination.
+- **Actor-Hopping Pattern**:
+  ```swift
+  let query = HKObserverQuery(sampleType: sampleType, predicate: nil) { [weak self] _, completionHandler, error in
+      guard error == nil else {
+          print("[HealthKitManager] Observer query callback error for \(sampleType.identifier): \(String(describing: error))")
+          completionHandler()
+          return
+      }
+      
+      Task { @MainActor [weak self] in
+          guard let self = self else {
+              completionHandler()
+              return
+          }
+          await self.fetchAllMetrics()
+          completionHandler()
+      }
+  }
+  ```
+  This guarantees:
+  - Error condition -> `completionHandler()` called immediately on background thread.
+  - Deallocated instance (`self == nil`) -> `completionHandler()` called immediately on `@MainActor`.
+  - Normal execution -> `completionHandler()` called on `@MainActor` **after** `await self.fetchAllMetrics()` finishes fetching data and calling `onDataUpdated?()`.
+
+### D. In-Flight Fetch Task Deduplication
+When multiple metrics update simultaneously (e.g., HRV and Resting HR delivered together by Apple Watch), multiple observer queries fire within milliseconds.
+To prevent overlapping, redundant 90-day queries:
+```swift
+private var activeFetchTask: Task<Void, Never>? = nil
+
+public func fetchAllMetrics() async {
+    if let existingTask = activeFetchTask {
+        await existingTask.value
+        return
+    }
+    
+    let task = Task { @MainActor in
+        await self.performFetchAllMetrics()
+    }
+    self.activeFetchTask = task
+    await task.value
+    self.activeFetchTask = nil
+}
+```
+
+---
+
+## 3. Precise Code Blueprint for `HealthKitManager.swift`
+
+Below is the complete code specification for `Health 26/HealthKitManager.swift`:
+
+```swift
 //
 //  HealthKitManager.swift
 //  Health 26
@@ -56,7 +187,6 @@ public final class HealthKitManager {
     private let healthStore = HKHealthStore()
     private var activeObserverQueries: [HKObserverQuery] = []
     private var activeFetchTask: Task<Void, Never>? = nil
-    private var isExecutingCallback: Bool = false
     
     // Required sample types to observe and read
     private var sampleTypesToObserve: [HKSampleType] {
@@ -114,11 +244,12 @@ public final class HealthKitManager {
                 }
                 
                 Task { @MainActor [weak self] in
-                    defer {
+                    guard let self = self else {
                         completionHandler()
+                        return
                     }
-                    guard let self = self else { return }
                     await self.fetchAllMetrics()
+                    completionHandler()
                 }
             }
             
@@ -142,10 +273,6 @@ public final class HealthKitManager {
     
     /// Primary entry point: Triggers concurrent fetching for all 4 health metrics over the last 90 days.
     public func fetchAllMetrics() async {
-        if isExecutingCallback {
-            return
-        }
-        
         if let existingTask = activeFetchTask {
             await existingTask.value
             return
@@ -155,12 +282,8 @@ public final class HealthKitManager {
             await self.performFetchAllMetrics()
         }
         self.activeFetchTask = task
-        
-        defer {
-            self.activeFetchTask = nil
-        }
-        
         await task.value
+        self.activeFetchTask = nil
     }
     
     private func performFetchAllMetrics() async {
@@ -211,11 +334,7 @@ public final class HealthKitManager {
             printSummaryToConsole(summary: generatedSummary)
             
             // Invoke reactive callback if set
-            if !isExecutingCallback, let onDataUpdated = onDataUpdated {
-                isExecutingCallback = true
-                defer {
-                    isExecutingCallback = false
-                }
+            if let onDataUpdated = onDataUpdated {
                 await onDataUpdated()
             }
             
@@ -227,7 +346,6 @@ public final class HealthKitManager {
     
     // MARK: - Query Methods
     
-    /// Fetch HRV (SDNN) samples in ms for the last 90 days.
     private func fetchHRV(from startDate: Date, to endDate: Date) async throws -> [Date: Double] {
         guard let hrvType = HKQuantityType.quantityType(forIdentifier: .heartRateVariabilitySDNN) else {
             return [:]
@@ -252,14 +370,12 @@ public final class HealthKitManager {
             grouped[dayKey, default: []].append(msValue)
         }
         
-        // Daily average calculation
         return grouped.mapValues { values in
             guard !values.isEmpty else { return 0 }
             return values.reduce(0, +) / Double(values.count)
         }
     }
     
-    /// Fetch Resting Heart Rate daily samples (bpm) for the last 90 days.
     private func fetchRestingHR(from startDate: Date, to endDate: Date) async throws -> [Date: Double] {
         guard let rhrType = HKQuantityType.quantityType(forIdentifier: .restingHeartRate) else {
             return [:]
@@ -290,7 +406,6 @@ public final class HealthKitManager {
         }
     }
     
-    /// Fetch Sleep duration (total sleep hours calculated per night) for the last 90 days.
     private func fetchSleepDuration(from startDate: Date, to endDate: Date) async throws -> [Date: Double] {
         guard let sleepType = HKCategoryType.categoryType(forIdentifier: .sleepAnalysis) else {
             return [:]
@@ -308,7 +423,6 @@ public final class HealthKitManager {
         let calendar = Calendar.current
         
         for sample in samples {
-            // Check for actual sleep stages / asleep values (filter out .inBed / .awake)
             let sleepValue = HKCategoryValueSleepAnalysis(rawValue: sample.value)
             let isAsleep: Bool
             if #available(iOS 16.0, *) {
@@ -323,16 +437,13 @@ public final class HealthKitManager {
             guard isAsleep else { continue }
             
             let durationSeconds = sample.endDate.timeIntervalSince(sample.startDate)
-            // Group sleep by morning/wakeup day (endDate)
             let nightKey = calendar.startOfDay(for: sample.endDate)
             groupedSeconds[nightKey, default: 0] += durationSeconds
         }
         
-        // Convert seconds to hours
         return groupedSeconds.mapValues { $0 / 3600.0 }
     }
     
-    /// Fetch Active Energy Burned (daily active calorie totals in kcal) for the last 90 days.
     private func fetchActiveEnergy(from startDate: Date, to endDate: Date) async throws -> [Date: Double] {
         guard let energyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) else {
             return [:]
@@ -454,17 +565,27 @@ public final class HealthKitManager {
         print("==================================================")
     }
 }
+```
 
-public enum HealthError: LocalizedError {
-    case notAvailable
-    case dateCalculationFailed
-    
-    public var errorDescription: String? {
-        switch self {
-        case .notAvailable:
-            return "HealthKit is not available on this device."
-        case .dateCalculationFailed:
-            return "Failed to calculate 90-day date range."
-        }
-    }
-}
+---
+
+## 4. Risk Analysis & Edge Case Mitigations
+
+| Risk / Edge Case | Cause / Trigger | Technical Impact | Mitigation Strategy |
+|---|---|---|---|
+| **Background Completion Leak** | Exception or forgotten `completionHandler()` in async path | iOS halts future background delivery to app or kills process | `completionHandler()` called explicitly in error path, nil-self path, and post-fetch path |
+| **Concurrent Query Throttling** | Multiple metric updates fire simultaneously | Multiple heavy 90-day queries run concurrently | `activeFetchTask` coalesces concurrent callers to single Task |
+| **iOS Simulator Limitations** | Simulator does not generate background delivery events | `enableBackgroundDelivery` throws error | Wrap `enableBackgroundDelivery` in `do-catch` so queries execute regardless |
+| **Authorization Revocation** | User revokes HealthKit permissions in Settings | Background queries fail or throw errors | Guard with `isAuthorized` check; clear active observers |
+
+---
+
+## 5. Verification & Test Plan
+
+1. **Static Analysis & Compilation**:
+   - Ensure clean compilation with `xcodebuild build -scheme "Health 26" -destination "generic/platform=iOS Simulator"` under Swift 6 strict concurrency checks.
+2. **Unit Tests**:
+   - Run `xcodebuild test -scheme "Health 26" -destination "platform=iOS Simulator,name=iPhone 16 Pro"` to ensure all 11 existing unit tests in `ReadinessEngineTests.swift` pass cleanly.
+3. **Runtime & Background Verification**:
+   - Verify `startObservingBackgroundUpdates()` registers 4 `HKObserverQuery` instances in `activeObserverQueries`.
+   - Verify calling `fetchAllMetrics()` triggers `onDataUpdated` callback when set.

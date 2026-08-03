@@ -7,6 +7,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var viewModel = AppViewModel()
+    @Environment(\.scenePhase) private var scenePhase
     
     var body: some View {
         NavigationStack {
@@ -120,26 +121,6 @@ struct ContentView: View {
                         }
                         .padding(40)
                     }
-                    
-                    // Refresh Action Button
-                    Button {
-                        Task {
-                            await viewModel.loadAndCalculateReadiness()
-                        }
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "arrow.clockwise")
-                            Text("Refresh Health Data")
-                        }
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .shadow(color: Color.blue.opacity(0.25), radius: 8, x: 0, y: 4)
-                    }
-                    .disabled(viewModel.healthKitManager.isLoading)
                 }
                 .padding(20)
             }
@@ -150,6 +131,13 @@ struct ContentView: View {
             .task {
                 if viewModel.calculatedResult == nil {
                     await viewModel.loadAndCalculateReadiness()
+                }
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    Task {
+                        await viewModel.loadAndCalculateReadiness()
+                    }
                 }
             }
         }
