@@ -4,7 +4,7 @@
 
 Refactor Oriv to eliminate the manual "Refresh" button and establish an automatic, reactive HealthKit syncing architecture using background observer queries, scene phase lifecycle listeners, and native pull-to-refresh.
 
-Working directory: /Users/devano/Documents/Projects/H24/Health 26
+Working directory: /Users/devano/Documents/Projects/H24/Oriv
 Integrity mode: development
 
 ## Requirements

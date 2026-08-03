@@ -1,10 +1,10 @@
 //
 //  ReadinessEngineTests.swift
-//  Health 26Tests
+//  OrivTests
 //
 
 import XCTest
-@testable import Health_26
+@testable import Oriv
 
 final class ReadinessEngineTests: XCTestCase {
 

@@ -1,13 +1,13 @@
 //
-//  Health_26UITests.swift
-//  Health 26UITests
+//  OrivUITests.swift
+//  OrivUITests
 //
 //  Created by Devano Jose on 26/07/2026.
 //
 
 import XCTest
 
-final class Health_26UITests: XCTestCase {
+final class OrivUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

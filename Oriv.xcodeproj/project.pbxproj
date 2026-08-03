@@ -12,37 +12,37 @@
 			containerPortal = 1B70B0B530162EBE001E253A /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 1B70B0BC30162EBE001E253A;
-			remoteInfo = "Health 26";
+			remoteInfo = Oriv;
 		};
 		1B70B0D530162EBF001E253A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1B70B0B530162EBE001E253A /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 1B70B0BC30162EBE001E253A;
-			remoteInfo = "Health 26";
+			remoteInfo = Oriv;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1B70B0BD30162EBE001E253A /* Health 26.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Health 26.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		1B70B0CA30162EBF001E253A /* Health 26Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Health 26Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		1B70B0D430162EBF001E253A /* Health 26UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Health 26UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B70B0BD30162EBE001E253A /* Oriv.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Oriv.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B70B0CA30162EBF001E253A /* OrivTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OrivTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B70B0D430162EBF001E253A /* OrivUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OrivUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		1B70B0BF30162EBE001E253A /* Health 26 */ = {
+		1B70B0BF30162EBE001E253A /* Oriv */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Health 26";
+			path = Oriv;
 			sourceTree = "<group>";
 		};
-		1B70B0CD30162EBF001E253A /* Health 26Tests */ = {
+		1B70B0CD30162EBF001E253A /* OrivTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Health 26Tests";
+			path = OrivTests;
 			sourceTree = "<group>";
 		};
-		1B70B0D730162EBF001E253A /* Health 26UITests */ = {
+		1B70B0D730162EBF001E253A /* OrivUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Health 26UITests";
+			path = OrivUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,9 +75,9 @@
 		1B70B0B430162EBE001E253A = {
 			isa = PBXGroup;
 			children = (
-				1B70B0BF30162EBE001E253A /* Health 26 */,
-				1B70B0CD30162EBF001E253A /* Health 26Tests */,
-				1B70B0D730162EBF001E253A /* Health 26UITests */,
+				1B70B0BF30162EBE001E253A /* Oriv */,
+				1B70B0CD30162EBF001E253A /* OrivTests */,
+				1B70B0D730162EBF001E253A /* OrivUITests */,
 				1B70B0BE30162EBE001E253A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -85,9 +85,9 @@
 		1B70B0BE30162EBE001E253A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1B70B0BD30162EBE001E253A /* Health 26.app */,
-				1B70B0CA30162EBF001E253A /* Health 26Tests.xctest */,
-				1B70B0D430162EBF001E253A /* Health 26UITests.xctest */,
+				1B70B0BD30162EBE001E253A /* Oriv.app */,
+				1B70B0CA30162EBF001E253A /* OrivTests.xctest */,
+				1B70B0D430162EBF001E253A /* OrivUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,9 +95,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1B70B0BC30162EBE001E253A /* Health 26 */ = {
+		1B70B0BC30162EBE001E253A /* Oriv */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1B70B0DE30162EBF001E253A /* Build configuration list for PBXNativeTarget "Health 26" */;
+			buildConfigurationList = 1B70B0DE30162EBF001E253A /* Build configuration list for PBXNativeTarget "Oriv" */;
 			buildPhases = (
 				1B70B0B930162EBE001E253A /* Sources */,
 				1B70B0BA30162EBE001E253A /* Frameworks */,
@@ -108,18 +108,18 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				1B70B0BF30162EBE001E253A /* Health 26 */,
+				1B70B0BF30162EBE001E253A /* Oriv */,
 			);
-			name = "Health 26";
+			name = Oriv;
 			packageProductDependencies = (
 			);
-			productName = "Health 26";
-			productReference = 1B70B0BD30162EBE001E253A /* Health 26.app */;
+			productName = Oriv;
+			productReference = 1B70B0BD30162EBE001E253A /* Oriv.app */;
 			productType = "com.apple.product-type.application";
 		};
-		1B70B0C930162EBF001E253A /* Health 26Tests */ = {
+		1B70B0C930162EBF001E253A /* OrivTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1B70B0E130162EBF001E253A /* Build configuration list for PBXNativeTarget "Health 26Tests" */;
+			buildConfigurationList = 1B70B0E130162EBF001E253A /* Build configuration list for PBXNativeTarget "OrivTests" */;
 			buildPhases = (
 				1B70B0C630162EBF001E253A /* Sources */,
 				1B70B0C730162EBF001E253A /* Frameworks */,
@@ -131,18 +131,18 @@
 				1B70B0CC30162EBF001E253A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				1B70B0CD30162EBF001E253A /* Health 26Tests */,
+				1B70B0CD30162EBF001E253A /* OrivTests */,
 			);
-			name = "Health 26Tests";
+			name = OrivTests;
 			packageProductDependencies = (
 			);
-			productName = "Health 26Tests";
-			productReference = 1B70B0CA30162EBF001E253A /* Health 26Tests.xctest */;
+			productName = OrivTests;
+			productReference = 1B70B0CA30162EBF001E253A /* OrivTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		1B70B0D330162EBF001E253A /* Health 26UITests */ = {
+		1B70B0D330162EBF001E253A /* OrivUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1B70B0E430162EBF001E253A /* Build configuration list for PBXNativeTarget "Health 26UITests" */;
+			buildConfigurationList = 1B70B0E430162EBF001E253A /* Build configuration list for PBXNativeTarget "OrivUITests" */;
 			buildPhases = (
 				1B70B0D030162EBF001E253A /* Sources */,
 				1B70B0D130162EBF001E253A /* Frameworks */,
@@ -154,13 +154,13 @@
 				1B70B0D630162EBF001E253A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				1B70B0D730162EBF001E253A /* Health 26UITests */,
+				1B70B0D730162EBF001E253A /* OrivUITests */,
 			);
-			name = "Health 26UITests";
+			name = OrivUITests;
 			packageProductDependencies = (
 			);
-			productName = "Health 26UITests";
-			productReference = 1B70B0D430162EBF001E253A /* Health 26UITests.xctest */;
+			productName = OrivUITests;
+			productReference = 1B70B0D430162EBF001E253A /* OrivUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -186,7 +186,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 1B70B0B830162EBE001E253A /* Build configuration list for PBXProject "Health 26" */;
+			buildConfigurationList = 1B70B0B830162EBE001E253A /* Build configuration list for PBXProject "Oriv" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -200,9 +200,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				1B70B0BC30162EBE001E253A /* Health 26 */,
-				1B70B0C930162EBF001E253A /* Health 26Tests */,
-				1B70B0D330162EBF001E253A /* Health 26UITests */,
+				1B70B0BC30162EBE001E253A /* Oriv */,
+				1B70B0C930162EBF001E253A /* OrivTests */,
+				1B70B0D330162EBF001E253A /* OrivUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -258,12 +258,12 @@
 /* Begin PBXTargetDependency section */
 		1B70B0CC30162EBF001E253A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 1B70B0BC30162EBE001E253A /* Health 26 */;
+			target = 1B70B0BC30162EBE001E253A /* Oriv */;
 			targetProxy = 1B70B0CB30162EBF001E253A /* PBXContainerItemProxy */;
 		};
 		1B70B0D630162EBF001E253A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 1B70B0BC30162EBE001E253A /* Health 26 */;
+			target = 1B70B0BC30162EBE001E253A /* Oriv */;
 			targetProxy = 1B70B0D530162EBF001E253A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -395,14 +395,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "Health 26/Health 26.entitlements";
+				CODE_SIGN_ENTITLEMENTS = Oriv/Oriv.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 9N5KMP2MC6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Oriv;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Oriv needs access to your health metrics to calculate your daily readiness score.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Oriv reads your HRV, Resting HR, Sleep, and Active Energy to compute your daily readiness score.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Oriv needs access to your health data.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -413,8 +413,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "H24.Health-26";
+				MARKETING_VERSION = 5.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.oriv.health;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -422,7 +422,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -431,14 +431,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "Health 26/Health 26.entitlements";
+				CODE_SIGN_ENTITLEMENTS = Oriv/Oriv.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 9N5KMP2MC6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Oriv;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Oriv needs access to your health metrics to calculate your daily readiness score.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Oriv reads your HRV, Resting HR, Sleep, and Active Energy to compute your daily readiness score.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Oriv needs access to your health data.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -449,8 +449,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "H24.Health-26";
+				MARKETING_VERSION = 5.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.oriv.health;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -458,7 +458,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -472,7 +472,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "H24.Health-26Tests";
+				PRODUCT_BUNDLE_IDENTIFIER = com.oriv.healthTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -480,7 +480,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Health 26.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Health 26";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Oriv.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Oriv";
 			};
 			name = Debug;
 		};
@@ -494,7 +494,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "H24.Health-26Tests";
+				PRODUCT_BUNDLE_IDENTIFIER = com.oriv.healthTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -502,7 +502,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Health 26.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Health 26";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Oriv.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Oriv";
 			};
 			name = Release;
 		};
@@ -514,7 +514,7 @@
 				DEVELOPMENT_TEAM = 9N5KMP2MC6;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "H24.Health-26UITests";
+				PRODUCT_BUNDLE_IDENTIFIER = com.oriv.healthUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -522,7 +522,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "Health 26";
+				TEST_TARGET_NAME = Oriv;
 			};
 			name = Debug;
 		};
@@ -534,7 +534,7 @@
 				DEVELOPMENT_TEAM = 9N5KMP2MC6;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "H24.Health-26UITests";
+				PRODUCT_BUNDLE_IDENTIFIER = com.oriv.healthUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -542,14 +542,14 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "Health 26";
+				TEST_TARGET_NAME = Oriv;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1B70B0B830162EBE001E253A /* Build configuration list for PBXProject "Health 26" */ = {
+		1B70B0B830162EBE001E253A /* Build configuration list for PBXProject "Oriv" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1B70B0DC30162EBF001E253A /* Debug */,
@@ -558,7 +558,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1B70B0DE30162EBF001E253A /* Build configuration list for PBXNativeTarget "Health 26" */ = {
+		1B70B0DE30162EBF001E253A /* Build configuration list for PBXNativeTarget "Oriv" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1B70B0DF30162EBF001E253A /* Debug */,
@@ -567,7 +567,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1B70B0E130162EBF001E253A /* Build configuration list for PBXNativeTarget "Health 26Tests" */ = {
+		1B70B0E130162EBF001E253A /* Build configuration list for PBXNativeTarget "OrivTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1B70B0E230162EBF001E253A /* Debug */,
@@ -576,7 +576,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1B70B0E430162EBF001E253A /* Build configuration list for PBXNativeTarget "Health 26UITests" */ = {
+		1B70B0E430162EBF001E253A /* Build configuration list for PBXNativeTarget "OrivUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1B70B0E530162EBF001E253A /* Debug */,

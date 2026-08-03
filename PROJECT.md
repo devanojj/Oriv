@@ -3,11 +3,11 @@
 ## Architecture
 - Framework: SwiftUI, HealthKit, Swift Observation (`@Observable`)
 - Concurrency Model: Swift 6 strict concurrency (`@MainActor`, `async/await`, `Task`)
-- Project Structure: Xcode Project `Health 26.xcodeproj`, Scheme `Health 26`
+- Project Structure: Xcode Project `Oriv.xcodeproj`, Scheme `Oriv`
   - `HealthKitManager.swift`: Encapsulates HealthKit store, background observers, background delivery, and metric fetching.
   - `AppViewModel.swift`: Main ViewModel (`@Observable @MainActor`) managing state and reactive synchronization with `HealthKitManager`.
   - `ContentView.swift`: Main SwiftUI view observing `AppViewModel`, with reactive lifecycle modifiers (`.task`, `.refreshable`, `.onChange(of: scenePhase)`).
-  - `ReadinessEngineTests.swift`: Unit test suite in `Health 26Tests`.
+  - `ReadinessEngineTests.swift`: Unit test suite in `OrivTests`.
 
 ## Feature Inventory
 | # | Feature | Description | Milestone | Source |
@@ -44,8 +44,8 @@
 - `public func loadData() async`: Invokes `healthKitManager.fetchAllMetrics()` and runs `processHealthData()`.
 
 ## Code Layout
-- `Health 26/HealthKitManager.swift`
-- `Health 26/AppViewModel.swift`
-- `Health 26/ContentView.swift`
-- `Health 26Tests/ReadinessEngineTests.swift`
-- `Health 26.xcodeproj`
+- `Oriv/HealthKitManager.swift`
+- `Oriv/AppViewModel.swift`
+- `Oriv/ContentView.swift`
+- `OrivTests/ReadinessEngineTests.swift`
+- `Oriv.xcodeproj`

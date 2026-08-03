@@ -1,13 +1,13 @@
 //
-//  Health_26UITestsLaunchTests.swift
-//  Health 26UITests
+//  OrivUITestsLaunchTests.swift
+//  OrivUITests
 //
 //  Created by Devano Jose on 26/07/2026.
 //
 
 import XCTest
 
-final class Health_26UITestsLaunchTests: XCTestCase {
+final class OrivUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true
