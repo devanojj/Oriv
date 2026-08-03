@@ -1,0 +1,26 @@
+# Xcode Build Products & Derived Data
+build/
+DerivedData/
+
+# Xcode User Data & State
+xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xccheckout
+*.mover-state
+
+# macOS System Files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Swift Package Manager & Build Artifacts
+.build/
+*.ipa
+*.dSYM.zip
+*.dSYM
