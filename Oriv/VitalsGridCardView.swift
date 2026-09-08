@@ -11,44 +11,32 @@ struct VitalsGridCardView: View {
     let breakdown: [MetricBreakdown]
     let recencies: [MetricRecency]
     let healthKitManager: HealthKitManager
-    
+
     private var hrvValue: String {
-        if let sample = findLatestSample(from: healthKitManager.hrvData) {
-            return String(format: "%.0f", sample)
-        }
-        return "—"
+        latest(healthKitManager.hrvData).map { String(format: "%.0f", $0) } ?? "—"
     }
-    
+
     private var rhrValue: String {
-        if let sample = findLatestSample(from: healthKitManager.restingHRData) {
-            return String(format: "%.0f", sample)
-        }
-        return "—"
+        latest(healthKitManager.restingHRData).map { String(format: "%.0f", $0) } ?? "—"
     }
-    
+
     private var sleepValue: String {
-        if let sample = findLatestSample(from: healthKitManager.sleepData) {
-            let hours = Int(sample)
-            let minutes = Int((sample - Double(hours)) * 60)
-            return "\(hours)h \(minutes)m"
-        }
-        return "—"
+        guard let sample = latest(healthKitManager.sleepData) else { return "—" }
+        let totalMinutes = Int((sample * 60).rounded())
+        return "\(totalMinutes / 60)h \(totalMinutes % 60)m"
     }
-    
+
     private var energyValue: String {
-        if let sample = findLatestSample(from: healthKitManager.activeEnergyData) {
-            return String(format: "%.0f", sample)
-        }
-        return "—"
+        latest(healthKitManager.activeEnergyData).map { String(format: "%.0f", $0) } ?? "—"
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("TODAY'S VITALS")
                 .font(.system(size: 11, weight: .bold, design: .rounded))
                 .tracking(1.2)
-                .foregroundStyle(Color(uiColor: .tertiaryLabel))
-            
+                .foregroundStyle(Theme.textTertiary)
+
             LazyVGrid(
                 columns: [
                     GridItem(.flexible(), spacing: 12),
@@ -60,58 +48,54 @@ struct VitalsGridCardView: View {
                     label: "HRV",
                     value: hrvValue,
                     unit: "ms",
-                    subscore: subscoreFor("HRV"),
-                    recency: recencyFor("HRV"),
-                    accentColor: Color(red: 0.16, green: 0.78, blue: 0.64)
+                    subscore: subscore(for: "HRV"),
+                    recency: recency(for: "HRV")
                 )
-                
+
                 VitalCell(
                     label: "RESTING HR",
                     value: rhrValue,
                     unit: "bpm",
-                    subscore: subscoreFor("Resting HR"),
-                    recency: recencyFor("Resting HR"),
-                    accentColor: Color(red: 0.92, green: 0.38, blue: 0.36)
+                    subscore: subscore(for: "Resting HR"),
+                    recency: recency(for: "Resting HR")
                 )
-                
+
                 VitalCell(
                     label: "SLEEP",
                     value: sleepValue,
                     unit: "",
-                    subscore: subscoreFor("Sleep"),
-                    recency: recencyFor("Sleep"),
-                    accentColor: Color(red: 0.42, green: 0.38, blue: 0.82)
+                    subscore: subscore(for: "Sleep"),
+                    recency: recency(for: "Sleep")
                 )
-                
+
                 VitalCell(
                     label: "TRAINING",
                     value: energyValue,
                     unit: "kcal",
-                    subscore: subscoreFor("Training Load"),
-                    recency: nil,
-                    accentColor: Color(red: 0.96, green: 0.62, blue: 0.16)
+                    subscore: subscore(for: "Training Load"),
+                    recency: nil
                 )
             }
         }
         .padding(20)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.04), radius: 10, x: 0, y: 4)
+        .orivCard()
     }
-    
-    private func subscoreFor(_ name: String) -> Int? {
-        breakdown.first(where: { $0.name == name })?.subscore
+
+    private func subscore(for name: String) -> Int? {
+        breakdown.first { $0.name == name }?.subscore
     }
-    
-    private func recencyFor(_ name: String) -> MetricRecency? {
-        recencies.first(where: { $0.name == name })
+
+    private func recency(for name: String) -> MetricRecency? {
+        recencies.first { $0.name == name }
     }
-    
-    private func findLatestSample(from data: [Date: Double]) -> Double? {
+
+    private func latest(_ data: [Date: Double]) -> Double? {
         let calendar = Calendar.current
         let todayKey = calendar.startOfDay(for: Date())
-        let validEntries = data.filter { calendar.startOfDay(for: $0.key) <= todayKey && !$0.value.isNaN }
-        return validEntries.max(by: { $0.key < $1.key })?.value
+        return data
+            .filter { calendar.startOfDay(for: $0.key) <= todayKey && $0.value.isFinite }
+            .max { $0.key < $1.key }?
+            .value
     }
 }
 
@@ -123,72 +107,64 @@ private struct VitalCell: View {
     let unit: String
     let subscore: Int?
     let recency: MetricRecency?
-    let accentColor: Color
-    
+
     private var subscoreColor: Color {
-        guard let s = subscore else { return Color(uiColor: .quaternaryLabel) }
-        switch s {
-        case 75...100: return Color(red: 0.16, green: 0.78, blue: 0.64)
-        case 50...74:  return Color(red: 0.24, green: 0.56, blue: 0.98)
-        case 30...49:  return Color(red: 0.96, green: 0.68, blue: 0.20)
-        default:       return Color(red: 0.92, green: 0.30, blue: 0.28)
-        }
+        guard let subscore else { return Theme.textQuaternary }
+        return Theme.color(forSubscore: subscore)
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // Label row
             HStack(spacing: 6) {
                 Text(label)
                     .font(.system(size: 10, weight: .bold, design: .rounded))
                     .tracking(1.0)
-                    .foregroundStyle(Color(uiColor: .tertiaryLabel))
-                
+                    .foregroundStyle(Theme.textTertiary)
+
                 Spacer()
-                
-                if let recency = recency, recency.daysAgo > 0 {
+
+                if let recency, recency.daysAgo > 0 {
                     Text("\(recency.daysAgo)d")
                         .font(.system(size: 9, weight: .bold, design: .rounded))
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Theme.warning)
                         .padding(.horizontal, 5)
                         .padding(.vertical, 2)
-                        .background(Color.orange.opacity(0.10))
+                        .background(Theme.warning.opacity(0.12))
                         .clipShape(Capsule())
                 }
             }
-            
-            // Value
+
             HStack(alignment: .firstTextBaseline, spacing: 3) {
                 Text(value)
                     .font(.system(size: 26, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(uiColor: .label))
+                    .foregroundStyle(Theme.textPrimary)
                     .contentTransition(.numericText())
-                
+
                 if !unit.isEmpty {
                     Text(unit)
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Color(uiColor: .tertiaryLabel))
+                        .foregroundStyle(Theme.textTertiary)
                 }
             }
-            
-            // Subscore bar
-            if let s = subscore {
+
+            if let subscore {
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
                         Capsule()
-                            .fill(Color(uiColor: .systemFill))
+                            .fill(Theme.track)
                             .frame(height: 4)
-                        
+
                         Capsule()
                             .fill(subscoreColor)
-                            .frame(width: max(0, geo.size.width * CGFloat(s) / 100.0), height: 4)
+                            .frame(width: max(0, geo.size.width * CGFloat(subscore) / 100.0), height: 4)
                     }
                 }
                 .frame(height: 4)
             }
         }
         .padding(14)
-        .background(Color(red: 0.97, green: 0.97, blue: 0.98))
+        .background(Theme.cardInset)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .accessibilityElement(children: .combine)
     }
 }

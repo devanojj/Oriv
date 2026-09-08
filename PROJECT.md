@@ -2,12 +2,16 @@
 
 ## Architecture
 - Framework: SwiftUI, HealthKit, Swift Observation (`@Observable`)
-- Concurrency Model: Swift 6 strict concurrency (`@MainActor`, `async/await`, `Task`)
+- Concurrency Model: `@MainActor` isolation with `async/await` and `Task`. Builds in Swift 5
+  language mode; `SWIFT_STRICT_CONCURRENCY` is **not** enabled, so Swift 6 checking is not enforced.
 - Project Structure: Xcode Project `Oriv.xcodeproj`, Scheme `Oriv`
   - `HealthKitManager.swift`: Encapsulates HealthKit store, background observers, background delivery, and metric fetching.
   - `AppViewModel.swift`: Main ViewModel (`@Observable @MainActor`) managing state and reactive synchronization with `HealthKitManager`.
   - `ContentView.swift`: Main SwiftUI view observing `AppViewModel`, with reactive lifecycle modifiers (`.task`, `.refreshable`, `.onChange(of: scenePhase)`).
-  - `ReadinessEngineTests.swift`: Unit test suite in `OrivTests`.
+  - `ReadinessEngine.swift`: Pure scoring engine — z-scores, variance-corrected composite, guardrails, bands.
+  - `Theme.swift`: Semantic colour tokens; light and dark defined together.
+  - `StatusCardView.swift`: The no-score states (permission, no data, stale, building baseline).
+  - `OrivTests/`: `ReadinessEngineTests`, `BaselineStatisticsTests`, `HealthKitManagerStressTests`.
 
 ## Feature Inventory
 | # | Feature | Description | Milestone | Source |
@@ -34,14 +38,26 @@
 
 ## Interface Contracts
 ### HealthKitManager ↔ AppViewModel
-- `public var onDataUpdated: (@MainActor () async -> Void)?`: Callback invoked on `@MainActor` when background delivery or query updates occur.
-- `public func fetchAllMetrics() async -> HealthDataPackage`: Alias/wrapper for fetching all 90-day health metrics.
-- `public func fetch90DayHealthData() async -> HealthDataPackage`: Returns full health data.
-- `public func enableBackgroundObservers()`: Sets up `HKObserverQuery` and `enableBackgroundDelivery(for:frequency: .immediate)` for 4 sample types.
+- `public var onDataUpdated: (@MainActor () async -> Void)?`: Invoked on `@MainActor` after a successful fetch, including fetches triggered by background delivery.
+- `public private(set) var accessState: HealthAccessState`: `.unknown` / `.unavailable` / `.needsAuthorization` / `.noDataVisible` / `.authorized`. Drives which screen `ContentView` shows.
+- `public var isAuthorized: Bool`: Computed — true only when `accessState == .authorized`.
+- `public func refreshAccessState() async`: Determines whether the permission sheet is still needed, without presenting it.
+- `public func requestAuthorization() async throws`: Presents the HealthKit sheet and starts observers. Does **not** imply access was granted — HealthKit never reports read status.
+- `public func fetchAllMetrics() async`: Fetches all four metrics over 90 days concurrently and publishes them. Returns `Void`; results land on the manager's `hrvData` / `restingHRData` / `sleepData` / `activeEnergyData`.
+- `public func fetch90DayHealthData() async`: Compatibility wrapper for `fetchAllMetrics()`.
+- `public func startObservingBackgroundUpdates() async`: Sets up `HKObserverQuery` plus `enableBackgroundDelivery(for:frequency: .immediate)` for the 4 sample types.
+- `public func stopObservingBackgroundUpdates()`: Stops and clears all observer queries.
 
 ### AppViewModel ↔ SwiftUI Views
-- `@Observable @MainActor final class AppViewModel`: Publishes `calculatedResult`, `metricRecencies`, `recencyNote`, `isLoading`, `errorMessage`.
-- `public func loadData() async`: Invokes `healthKitManager.fetchAllMetrics()` and runs `processHealthData()`.
+- `@Observable @MainActor final class AppViewModel`: Publishes `calculatedResult`, `metricRecencies`, `recencyNote`. Loading and error state live on `healthKitManager` (`isLoading`, `errorMessage`).
+- `public func loadAndCalculateReadiness() async`: Refreshes access state, fetches, then scores.
+- `public func requestHealthAccess() async`: Presents the permission sheet, then fetches and scores.
+- `public func processHealthData()`: Converts the manager's raw data into a `ReadinessInput` and scores it.
+
+### ReadinessEngine
+- `public static func calculate(from: ReadinessInput) -> ReadinessResult`: Pure. Imports only `Foundation`.
+- `ReadinessResult.status`: `.scored` / `.insufficientBaseline` / `.staleData(daysAgo:)`. `insufficientData` is a computed convenience meaning "not `.scored`".
+- `ReadinessEngine.Tuning`: All calibration constants (weights, 7-day baseline minimum, ±3σ clamp, correlation, centre 70 / spread 15, guardrail caps, 1-day freshness window).
 
 ## Code Layout
 - `Oriv/HealthKitManager.swift`
