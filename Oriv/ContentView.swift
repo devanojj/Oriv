@@ -8,7 +8,10 @@
 import SwiftUI
 
 struct ContentView: View {
+    let auth: AuthManager
+
     @State private var viewModel = AppViewModel()
+    @State private var isShowingProfile = false
     @Environment(\.scenePhase) private var scenePhase
 
     /// One of these, and only one, is on screen at a time.
@@ -70,6 +73,21 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(Theme.canvas, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isShowingProfile = true
+                    } label: {
+                        Image(systemName: "person.crop.circle")
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                    .accessibilityLabel("Account")
+                }
+            }
+            .sheet(isPresented: $isShowingProfile) {
+                ProfileView(auth: auth)
+            }
             .refreshable {
                 await viewModel.loadAndCalculateReadiness()
             }
@@ -172,11 +190,15 @@ struct ContentView: View {
     }
 }
 
+private func previewAuth() -> AuthManager {
+    AuthManager(service: InMemoryAuthService(), sessionStore: InMemorySessionStore())
+}
+
 #Preview("Light") {
-    ContentView()
+    ContentView(auth: previewAuth())
 }
 
 #Preview("Dark") {
-    ContentView()
+    ContentView(auth: previewAuth())
         .preferredColorScheme(.dark)
 }

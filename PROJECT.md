@@ -11,7 +11,11 @@
   - `ReadinessEngine.swift`: Pure scoring engine — z-scores, variance-corrected composite, guardrails, bands.
   - `Theme.swift`: Semantic colour tokens; light and dark defined together.
   - `StatusCardView.swift`: The no-score states (permission, no data, stale, building baseline).
-  - `OrivTests/`: `ReadinessEngineTests`, `BaselineStatisticsTests`, `HealthKitManagerStressTests`.
+  - `Auth/`: Authentication (see [AUTH_DESIGN.md](AUTH_DESIGN.md)). `AuthManager` (`@Observable @MainActor`)
+    mirrors `HealthKitManager`'s shape; `RootView` gates on `AuthState` and `ContentView` sits
+    beneath it unchanged. Backed by `InMemoryAuthService` until Supabase is wired.
+  - `OrivTests/`: `ReadinessEngineTests`, `BaselineStatisticsTests`, `ThemeContrastTests`,
+    `AuthManagerTests`, `AppleSignInTests`, `HealthKitManagerStressTests`.
 
 ## Feature Inventory
 | # | Feature | Description | Milestone | Source |

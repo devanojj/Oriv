@@ -31,6 +31,10 @@ public enum Theme {
     )
 
     /// Recessed surface nested *inside* a card (individual vital cells).
+    ///
+    /// - Important: Only valid on top of `card`. In light mode this is **deliberately the
+    ///   same colour as `canvas`**, so anything placed directly on the canvas with this
+    ///   token becomes invisible. Use `orivCard()` for surfaces that sit on the canvas.
     public static let cardInset = dynamic(
         light: rgb(0.97, 0.97, 0.98),
         dark: rgb(0.155, 0.155, 0.18)
