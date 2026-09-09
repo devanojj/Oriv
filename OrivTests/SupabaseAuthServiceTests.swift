@@ -118,6 +118,11 @@ final class SupabaseAuthServiceTests: XCTestCase {
         guard let config = SupabaseConfig.fromBundle(Bundle(for: AuthManager.self)) else {
             throw XCTSkip("No Supabase configuration in this build.")
         }
+        // Hard guard: this test signs users up. It must never be able to run against a
+        // hosted project, whatever the build happens to be configured with.
+        guard let host = config.url.host, ["127.0.0.1", "::1", "localhost"].contains(host) else {
+            throw XCTSkip("Configured Supabase is not local (\(config.url.host ?? "?")) — refusing to create users against a remote project.")
+        }
         guard await Self.isReachable(config) else {
             throw XCTSkip("Local Supabase is not running — start it with `supabase start`.")
         }

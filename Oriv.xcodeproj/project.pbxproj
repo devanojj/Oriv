@@ -29,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A1B2C3D400000000000000F1 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Base.xcconfig; path = Config/Base.xcconfig; sourceTree = "<group>"; };
 		1B70B0BD30162EBE001E253A /* Oriv.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Oriv.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1B70B0CA30162EBF001E253A /* OrivTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OrivTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1B70B0D430162EBF001E253A /* OrivUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OrivUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -82,6 +83,7 @@
 		1B70B0B430162EBE001E253A = {
 			isa = PBXGroup;
 			children = (
+				A1B2C3D400000000000000F1 /* Base.xcconfig */,
 				1B70B0BF30162EBE001E253A /* Oriv */,
 				1B70B0CD30162EBF001E253A /* OrivTests */,
 				1B70B0D730162EBF001E253A /* OrivUITests */,
@@ -403,6 +405,7 @@
 			name = Release;
 		};
 		1B70B0DF30162EBF001E253A /* Debug */ = {
+			baseConfigurationReference = A1B2C3D400000000000000F1 /* Base.xcconfig */;
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -426,8 +429,6 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				ORIV_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0;
-				ORIV_SUPABASE_URL = "http://127.0.0.1:54321";
 				PRODUCT_BUNDLE_IDENTIFIER = com.oriv.health;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -441,6 +442,7 @@
 			name = Debug;
 		};
 		1B70B0E030162EBF001E253A /* Release */ = {
+			baseConfigurationReference = A1B2C3D400000000000000F1 /* Base.xcconfig */;
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -464,8 +466,6 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				ORIV_SUPABASE_ANON_KEY = "";
-				ORIV_SUPABASE_URL = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.oriv.health;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

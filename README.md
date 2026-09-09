@@ -177,6 +177,15 @@ Readiness is a claim about *today*. If the freshest core reading is more than a 
 
 ## Build & test
 
+First-time setup — credentials are gitignored, so copy the template:
+
+```bash
+cp Config/Secrets.example.xcconfig Config/Secrets.xcconfig
+```
+
+Fill it in (`supabase status` prints the local anon key). The build works without it; auth
+simply falls back to the in-memory service. See [AUTH_DESIGN.md](AUTH_DESIGN.md) §17.
+
 ```bash
 xcodebuild build -project Oriv.xcodeproj -scheme Oriv \
   -destination 'platform=iOS Simulator,name=iPhone 16'

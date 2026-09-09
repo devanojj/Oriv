@@ -1,8 +1,8 @@
 # Design: Oriv Authentication
 
 Status: **M1 DONE** · M2–M5 proposed.
-`SupabaseAuthService` is live and verified against a local `supabase start` stack. Only a
-hosted (cloud) project remains before release — see §17.
+Hosted project provisioned, migration applied and verified, Release configured. Two
+dashboard/portal steps remain before Apple sign-in works end to end — see §17.
 Companion to [PROJECT.md](PROJECT.md). Covers accounts, sign-in, sign-out, and account deletion.
 
 ---
@@ -484,25 +484,91 @@ Release deliberately does **not** fall back to the in-memory fake. A shipping bu
 accepted sign-ins against a local stand-in would give users an account that does not exist —
 worse than an honest failure. A `#warning` fires in Release until configuration is set.
 
+### Hosted project
+
+| | |
+|---|---|
+| Project ref | `fhwpeciwafskkgeldmfd` |
+| Org | GateHouse Systems |
+| Region | `eu-west-1` (Ireland) — EU, satisfying §2. **Permanent.** |
+| URL | `https://fhwpeciwafskkgeldmfd.supabase.co` |
+
+Applied and verified:
+
+- `supabase db push` applied `20260909000001_profiles.sql`; `supabase migration list` shows
+  local and remote in sync.
+- Hosted schema checked over REST with the anon key: `profiles` exists, an anon `SELECT`
+  returns `[]` (RLS blocking rather than erroring), and `/auth/v1/health` returns 200.
+- Release configuration carries the hosted URL and anon key; confirmed by reading them back
+  out of the built Release bundle. The "not configured" `#warning` no longer fires.
+
+### Credentials are not in version control
+
+No key value is tracked. `Config/Base.xcconfig` (committed) sets empty defaults and then
+optionally includes `Config/Secrets.xcconfig` (**gitignored**), which holds the real values:
+
+```
+Config/Base.xcconfig             committed — defaults + `#include? "Secrets.xcconfig"`
+Config/Secrets.example.xcconfig  committed — template
+Config/Secrets.xcconfig          gitignored — real values
+```
+
+Setup on a fresh clone: copy the example to `Secrets.xcconfig` and fill it in. The include
+is optional, so a clone without it still builds — Debug falls back to `InMemoryAuthService`,
+Release to `UnconfiguredAuthService` with a `#warning`. Verified by building with the file
+removed.
+
+Two gotchas worth knowing:
+
+- **`//` starts a comment in xcconfig.** A URL written literally is truncated at the scheme
+  (`https://x` becomes `https:`). Hence the `SLASH = /` indirection in the template.
+- **Xcode rewrites `project.pbxproj`** and strips quotes it considers unnecessary, so a
+  value that was added quoted can reappear unquoted. Any cleanup has to match both forms.
+
+The anon key is publishable and RLS-gated, so this is hygiene rather than damage control —
+but keeping it out of git means a secret scanner stays useful instead of firing on every
+commit until people learn to ignore it. **The `service_role` key must never appear in any
+of these files**: it bypasses RLS entirely.
+
+### Configuration per build
+
+| Build | Points at | Why |
+|-------|-----------|-----|
+| Debug | `http://127.0.0.1:54321` | Fast, offline, disposable — and dev work never writes to the production database. |
+| Release | hosted project | What ships. |
+
+To exercise Apple sign-in during development, either build Release or temporarily change
+`ORIV_SUPABASE_URL` in the Debug configuration. Remember `127.0.0.1` is unreachable from a
+physical device (§ above).
+
+> The live round-trip test refuses to run against anything but loopback. It signs users up,
+> and must never be able to create accounts in the hosted project.
+
+### ⚠️ Do not run `supabase config push`
+
+`supabase config diff` against this project reports **13 changes**, several of which would
+weaken the live project by pushing local-dev conveniences to it:
+
+| Setting | Remote | Local would set |
+|---------|--------|-----------------|
+| `auth.email.enable_confirmations` | `true` | `false` |
+| `auth.mfa.totp.enroll_enabled` / `verify_enabled` | `true` | `false` |
+| `auth.email.max_frequency` | `1m` | `1s` |
+| `auth.email.otp_length` | `8` | `6` |
+| `auth.site_url` | `http://localhost:3000` | `http://127.0.0.1:3000` |
+
+`config.toml` describes the **local** stack. Change remote auth settings in the dashboard.
+Note also that `auth.external.apple.client_id` is reported as unmanaged by the diff, so
+`config push` would not reliably configure the provider anyway.
+
 ### Remaining before release
 
-All of these need account access that the tooling here does not have — the Supabase CLI is
-not logged in, and the Developer portal is web-only.
+Both need a browser; neither is reachable from the CLI.
 
-| # | Step | Needs |
+| # | Step | Where |
 |---|------|-------|
-| 1 | `supabase login`, then create the project — **EU region**, unchangeable later (§2) | Supabase account |
-| 2 | `supabase link --project-ref <ref>` then `supabase db push` | linked project |
-| 3 | Enable the Apple provider, with `com.oriv.health` as an authorized client id | Supabase dashboard |
-| 4 | Set `ORIV_SUPABASE_URL` / `ORIV_SUPABASE_ANON_KEY` in the **Release** configuration | project URL + anon key |
-| 5 | Enable **Sign in with Apple** for the App ID. The entitlement is already present; without the portal side, device signing fails | Apple Developer account |
+| 1 | Enable the **Apple** provider, with `com.oriv.health` as an authorized client id. Native sign-in verifies an identity token, so no Services ID or secret is needed — only the client id. | Supabase dashboard → Authentication → Providers |
+| 2 | Enable the **Sign in with Apple** capability for the App ID. The entitlement is already in `Oriv.entitlements`; without the portal side, device signing fails. | developer.apple.com → Certificates, Identifiers & Profiles |
 
-Step 4 is a two-line change once the values exist. Steps 1–3 and 5 are dashboard work.
-
-After that, M2 (account deletion) is required by Guideline 5.1.1(v) before any release that
-ships accounts.
-
-Sign in with Apple cannot be verified end-to-end locally: Supabase must check the identity
-token against Apple's public keys with a matching audience, which needs the hosted provider
-config. Everything around that credential — configuration, transport, session decoding,
-mapping, refresh, and the database trigger — is verified.
+After those, Apple sign-in works end to end on a Release build. Then M2 (account deletion),
+which Guideline 5.1.1(v) requires before any release that ships accounts.

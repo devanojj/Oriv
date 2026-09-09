@@ -1,0 +1,14 @@
+// Base.xcconfig — committed.
+//
+// Supabase credentials are NOT stored here. They live in Secrets.xcconfig, which is
+// gitignored, so that no key value is ever tracked in version control.
+//
+// Copy Secrets.example.xcconfig to Secrets.xcconfig and fill it in. The include below is
+// optional (`#include?`), so a fresh clone still builds without it — the app then falls
+// back to InMemoryAuthService in Debug and refuses sign-in in Release.
+
+// Defaults when Secrets.xcconfig is absent.
+ORIV_SUPABASE_URL =
+ORIV_SUPABASE_ANON_KEY =
+
+#include? "Secrets.xcconfig"
