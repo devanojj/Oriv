@@ -1,6 +1,6 @@
 # Oriv — Daily Readiness Score for iOS
 
-Oriv is a native iOS app (SwiftUI / HealthKit) that reads HRV, Resting Heart Rate, Sleep, and Active Energy from Apple Health and computes a **daily readiness score (0–100)** with recovery bands, sub-scores, and a training recommendation. Zero third-party dependencies.
+Oriv is a native iOS app (SwiftUI / HealthKit) that reads HRV, Resting Heart Rate, Sleep, and Active Energy from Apple Health and computes a **daily readiness score (0–100)** with recovery bands, sub-scores, and a training recommendation.
 
 ---
 
@@ -15,7 +15,8 @@ Oriv is a native iOS app (SwiftUI / HealthKit) that reads HRV, Resting Heart Rat
 | **Data** | HealthKit, read-only, 90-day rolling fetch |
 | **Bundle ID** | `com.oriv.health` |
 | **Version** | 1.0 (build 1) |
-| **Dependencies** | None — Apple frameworks only |
+| **Dependencies** | `supabase-swift` (Auth product only) — see [AUTH_DESIGN.md](AUTH_DESIGN.md) |
+| **Accounts** | Sign in with Apple, or use the app anonymously |
 
 > **Note on concurrency:** the project builds in Swift 5 language mode (`SWIFT_VERSION = 5.0`) and does not set `SWIFT_STRICT_CONCURRENCY`. The code is written to be actor-correct — `HealthKitManager` and `AppViewModel` are `@MainActor`, and the scoring types are `Sendable` — but Swift 6 strict-concurrency checking is **not** enforced by the compiler. Turning it on is a separate piece of work.
 
@@ -199,7 +200,14 @@ xcodebuild test -project Oriv.xcodeproj -scheme Oriv \
 |-----|-------|
 | `NSHealthShareUsageDescription` | "Oriv reads your HRV, Resting HR, Sleep, and Active Energy to compute your daily readiness score." |
 
-Read-only access. No data leaves the device, and there is no networking code in the project.
+Read-only HealthKit access.
+
+**Health data never leaves the device.** The readiness score is computed on-device by
+`ReadinessEngine`, and no health metric is transmitted anywhere. Accounts are the only
+networking in the app: signing in exchanges an Apple identity token with Supabase and
+stores a session. Nothing in the `profiles` table is health data.
+
+Using the app **without an account** ("Skip for now") makes no network requests at all.
 
 The entitlements request `com.apple.developer.healthkit` and `…healthkit.background-delivery` only. Oriv does **not** request `health-records` (clinical records) — it has no use for it, and requesting an entitlement you don't use invites App Store review questions you can't answer.
 
@@ -211,6 +219,8 @@ The entitlements request `com.apple.developer.healthkit` and `…healthkit.backg
 
 - Active energy is a weak proxy for training load (see above).
 - No history or trend view — the app shows today only.
+- Accounts are Apple-only so far; Google and email/password are planned (AUTH_DESIGN.md M3/M4).
+- Account deletion is not yet implemented and is **required before any release with accounts** (AUTH_DESIGN.md M2).
 - No widget or watch complication.
 - No onboarding beyond the permission card.
 - Swift 6 strict concurrency is not enabled.

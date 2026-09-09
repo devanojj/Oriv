@@ -341,6 +341,45 @@ final class AuthManagerTests: XCTestCase {
         XCTAssertEqual(manager.state, .signedOut(nil))
     }
 
+    // MARK: - Unconfigured builds
+
+    /// A build with no Supabase configuration must refuse sign-in rather than hand back a
+    /// convincing fake session.
+    func testUnconfiguredServiceRefusesSignIn() async {
+        let store = InMemorySessionStore()
+        let manager = makeManager(service: UnconfiguredAuthService(), store: store)
+
+        await manager.handleAppleCredential(makeCredential())
+
+        guard case .signedOut(let error) = manager.state else {
+            return XCTFail("Expected to stay signed out, got \(manager.state)")
+        }
+        XCTAssertNotNil(error, "The failure must be visible, not silent")
+        XCTAssertNil(store.peek, "Nothing may be persisted for a sign-in that did not happen")
+        XCTAssertNil(manager.currentUser)
+    }
+
+    /// Anonymous use must survive a missing configuration — the app still works offline.
+    func testUnconfiguredServiceStillAllowsAnonymousUse() async {
+        let manager = makeManager(service: UnconfiguredAuthService())
+
+        manager.skipSignIn()
+
+        XCTAssertEqual(manager.state, .anonymous)
+    }
+
+    /// Sign-out must always clear local state, even with no backend to talk to.
+    func testUnconfiguredServiceStillSignsOutCleanly() async {
+        let store = InMemorySessionStore(initial: makeSession())
+        let manager = makeManager(service: UnconfiguredAuthService(), store: store)
+        await manager.restoreSession()
+
+        await manager.signOut()
+
+        XCTAssertEqual(manager.state, .signedOut(nil))
+        XCTAssertNil(store.peek)
+    }
+
     // MARK: - Error copy
 
     /// Distinguishing "no such account" from "wrong password" leaks which emails are

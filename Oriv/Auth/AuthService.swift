@@ -132,3 +132,30 @@ public actor InMemoryAuthService: AuthService {
         ))
     }
 }
+
+// MARK: - Unconfigured
+
+/// Used by builds that carry no Supabase configuration. Every operation fails with a clear
+/// message rather than pretending to succeed.
+///
+/// This exists so a misconfigured Release build cannot ship working-looking fake auth. See
+/// `AuthManager.makeDefaultService()`.
+public nonisolated struct UnconfiguredAuthService: AuthService {
+    public init() {}
+
+    private var failure: AuthError {
+        .server("Sign-in isn't available in this build.")
+    }
+
+    public func signInWithApple(_ credential: AppleCredential) async throws -> AuthSession {
+        throw failure
+    }
+
+    public func refresh(_ session: AuthSession) async throws -> AuthSession {
+        throw failure
+    }
+
+    /// Signing out is always allowed to "succeed" — the caller clears local state either
+    /// way, and refusing would strand a user with credentials they cannot drop.
+    public func signOut() async throws {}
+}

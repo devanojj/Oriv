@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Merged with the keys Xcode generates (GENERATE_INFOPLIST_FILE stays YES).
+	  Values come from the ORIV_SUPABASE_* build settings, which differ per configuration:
+	  Debug points at the local `supabase start` stack, Release is empty until a cloud
+	  project exists. See AUTH_DESIGN.md §17.
+
+	  The anon key is safe to ship — it carries no authority and every table is behind RLS.
+	  The service_role key must never appear here.
+	-->
+	<key>SupabaseURL</key>
+	<string>$(ORIV_SUPABASE_URL)</string>
+	<key>SupabaseAnonKey</key>
+	<string>$(ORIV_SUPABASE_ANON_KEY)</string>
+</dict>
+</plist>

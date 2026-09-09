@@ -1,8 +1,8 @@
 # Design: Oriv Authentication
 
-Status: **M1 IMPLEMENTED** (backend pending) · M2–M5 proposed.
-M1 shipped against `InMemoryAuthService`; the Supabase project and `SupabaseAuthService`
-are the remaining work. See §17.
+Status: **M1 DONE** · M2–M5 proposed.
+`SupabaseAuthService` is live and verified against a local `supabase start` stack. Only a
+hosted (cloud) project remains before release — see §17.
 Companion to [PROJECT.md](PROJECT.md). Covers accounts, sign-in, sign-out, and account deletion.
 
 ---
@@ -441,22 +441,68 @@ supabase/migrations/
 
 ---
 
-## 17. Outstanding for M1
+## 17. State of M1
 
-Everything above is built, tested and running. What remains needs a Supabase project:
+### Done and verified
 
-1. Create the project — **EU region**, which cannot be changed later (§2).
-2. Run `supabase/migrations/0001_profiles.sql`.
-3. Configure the Apple provider: bundle id `com.oriv.health` as an authorized client id.
-4. Add the `supabase-swift` SPM package.
-5. Write `SupabaseAuthService: AuthService` — three methods, and the existing
-   `AuthManagerTests` already pin the contract it must satisfy.
-6. Swap `AuthManager.makeDefaultService()` to return it. A Release build currently emits a
-   `#warning` until this is done.
-7. Enable the **Sign in with Apple** capability for the App ID in the Developer portal. The
-   entitlement is already in `Oriv.entitlements`; without the portal side, device signing
-   will fail.
+| Item | How it was verified |
+|------|---------------------|
+| `0001_profiles.sql` — table, RLS, triggers | Applied to a local stack. Confirmed by query: the trigger auto-provisions a profile on user creation; `display_name`/`email` survive an attempted `null` overwrite; user A sees exactly 1 row and user B exactly 1, `anon` sees 0; a cross-user `UPDATE` affects 0 rows; deleting the `auth.users` row cascades the profile away. |
+| `supabase-swift` 2.55.2 (`Auth` product only) | Resolved and linked into the app and test targets. |
+| `SupabaseAuthService` | Live round-trip against local GoTrue: config → `AuthClient` → sign-up → `Session` → `AuthSession`, plus a refresh that preserves the user id. |
+| Config plumbing | `Config/Info.plist` merges with Xcode's generated plist; `ORIV_SUPABASE_*` build settings differ per configuration. Asserted from inside the built bundle. |
+| Migration applies to an empty database | `supabase db reset` from scratch; `supabase db lint` reports no schema errors. |
+| Unconfigured builds refuse sign-in | Release without configuration uses `UnconfiguredAuthService`, not a working fake. |
+| Everything from M1's original scope | 92 tests, 2 skipped, 0 failures. |
 
-Only after step 6 does data leave the device — so the README's "no data leaves the device"
-and "zero dependencies" claims are still accurate today, and must be rewritten as part of
-that step (§10).
+Note: `INFOPLIST_KEY_<custom>` does **not** work — Xcode only honours keys it recognises, and
+silently drops the rest. Hence the merged `Config/Info.plist`.
+
+### Local development
+
+```bash
+supabase start          # applies migrations automatically
+```
+
+Debug builds point at `http://127.0.0.1:54321` with the standard local anon key. That key is
+identical for every local Supabase install and grants nothing, so it is committed
+deliberately.
+
+> **Debug builds on a physical device cannot reach `127.0.0.1`** — that address is the
+> device itself, not your Mac. Simulator builds work because they share the host's loopback.
+> To run a Debug build on hardware, point `ORIV_SUPABASE_URL` at your Mac's LAN address, or
+> at the hosted project.
+
+### Behaviour without configuration
+
+| Build | Service | Effect |
+|-------|---------|--------|
+| Debug | `InMemoryAuthService` | Sign-in "works" locally so the app stays developable. |
+| Release | `UnconfiguredAuthService` | Sign-in fails with a clear message; anonymous use still works. |
+
+Release deliberately does **not** fall back to the in-memory fake. A shipping build that
+accepted sign-ins against a local stand-in would give users an account that does not exist —
+worse than an honest failure. A `#warning` fires in Release until configuration is set.
+
+### Remaining before release
+
+All of these need account access that the tooling here does not have — the Supabase CLI is
+not logged in, and the Developer portal is web-only.
+
+| # | Step | Needs |
+|---|------|-------|
+| 1 | `supabase login`, then create the project — **EU region**, unchangeable later (§2) | Supabase account |
+| 2 | `supabase link --project-ref <ref>` then `supabase db push` | linked project |
+| 3 | Enable the Apple provider, with `com.oriv.health` as an authorized client id | Supabase dashboard |
+| 4 | Set `ORIV_SUPABASE_URL` / `ORIV_SUPABASE_ANON_KEY` in the **Release** configuration | project URL + anon key |
+| 5 | Enable **Sign in with Apple** for the App ID. The entitlement is already present; without the portal side, device signing fails | Apple Developer account |
+
+Step 4 is a two-line change once the values exist. Steps 1–3 and 5 are dashboard work.
+
+After that, M2 (account deletion) is required by Guideline 5.1.1(v) before any release that
+ships accounts.
+
+Sign in with Apple cannot be verified end-to-end locally: Supabase must check the identity
+token against Apple's public keys with a matching audience, which needs the hosted provider
+config. Everything around that credential — configuration, transport, session decoding,
+mapping, refresh, and the database trigger — is verified.

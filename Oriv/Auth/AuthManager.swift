@@ -55,12 +55,24 @@ public final class AuthManager {
         self.restoreTimeout = restoreTimeout
     }
 
-    /// The backend stand-in used until Supabase is wired (AUTH_DESIGN.md M1).
+    /// Live Supabase when the bundle carries a configuration.
+    ///
+    /// Without one, Debug gets the in-memory stand-in so the app is still developable, but
+    /// Release gets a service that *refuses* to sign anyone in. A shipping build that
+    /// silently accepted sign-ins against a local fake would hand users an account that
+    /// does not exist — far worse than an honest failure. Anonymous use still works either
+    /// way, so the app stays usable.
     private static func makeDefaultService() -> any AuthService {
-        #if !DEBUG
-        #warning("Auth is still backed by InMemoryAuthService — wire SupabaseAuthService before any release. See AUTH_DESIGN.md §2.")
-        #endif
+        if let config = SupabaseConfig.fromBundle() {
+            return SupabaseAuthService(config: config)
+        }
+
+        #if DEBUG
         return InMemoryAuthService()
+        #else
+        #warning("No SupabaseURL/SupabaseAnonKey in this configuration — sign-in will be disabled. Set them before release. See AUTH_DESIGN.md §17.")
+        return UnconfiguredAuthService()
+        #endif
     }
 
     // MARK: - Launch

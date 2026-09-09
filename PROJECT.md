@@ -13,7 +13,8 @@
   - `StatusCardView.swift`: The no-score states (permission, no data, stale, building baseline).
   - `Auth/`: Authentication (see [AUTH_DESIGN.md](AUTH_DESIGN.md)). `AuthManager` (`@Observable @MainActor`)
     mirrors `HealthKitManager`'s shape; `RootView` gates on `AuthState` and `ContentView` sits
-    beneath it unchanged. Backed by `InMemoryAuthService` until Supabase is wired.
+    beneath it unchanged. Backed by `SupabaseAuthService` (supabase-swift, `Auth` product) when the bundle carries a
+    configuration, and `InMemoryAuthService` otherwise.
   - `OrivTests/`: `ReadinessEngineTests`, `BaselineStatisticsTests`, `ThemeContrastTests`,
     `AuthManagerTests`, `AppleSignInTests`, `HealthKitManagerStressTests`.
 
