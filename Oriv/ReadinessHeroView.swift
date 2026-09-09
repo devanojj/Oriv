@@ -2,7 +2,7 @@
 //  ReadinessHeroView.swift
 //  Oriv
 //
-//  Premium light-mode readiness score hero card.
+//  Readiness score hero card.
 //
 
 import SwiftUI
@@ -10,75 +10,35 @@ import SwiftUI
 struct ReadinessHeroView: View {
     let result: ReadinessResult
     let recencyNote: String?
-    
+
     @State private var animatedProgress: CGFloat = 0
     @State private var animatedScore: Int = 0
-    
+
     private var score: Int { result.score ?? 0 }
     private var band: ReadinessBand { result.band ?? .fair }
-    
-    private var bandGradient: LinearGradient {
-        switch band {
-        case .ready:
-            return LinearGradient(
-                colors: [Color(red: 0.16, green: 0.78, blue: 0.64), Color(red: 0.10, green: 0.62, blue: 0.55)],
-                startPoint: .topLeading, endPoint: .bottomTrailing
-            )
-        case .good:
-            return LinearGradient(
-                colors: [Color(red: 0.24, green: 0.56, blue: 0.98), Color(red: 0.18, green: 0.42, blue: 0.88)],
-                startPoint: .topLeading, endPoint: .bottomTrailing
-            )
-        case .fair:
-            return LinearGradient(
-                colors: [Color(red: 0.96, green: 0.68, blue: 0.20), Color(red: 0.92, green: 0.54, blue: 0.14)],
-                startPoint: .topLeading, endPoint: .bottomTrailing
-            )
-        case .poor:
-            return LinearGradient(
-                colors: [Color(red: 0.92, green: 0.30, blue: 0.28), Color(red: 0.78, green: 0.18, blue: 0.22)],
-                startPoint: .topLeading, endPoint: .bottomTrailing
-            )
-        }
-    }
-    
-    private var bandColor: Color {
-        switch band {
-        case .ready: return Color(red: 0.16, green: 0.78, blue: 0.64)
-        case .good:  return Color(red: 0.24, green: 0.56, blue: 0.98)
-        case .fair:  return Color(red: 0.96, green: 0.68, blue: 0.20)
-        case .poor:  return Color(red: 0.92, green: 0.30, blue: 0.28)
-        }
-    }
-    
-    private var bandAccentLight: Color {
-        bandColor.opacity(0.10)
-    }
-    
+    private var bandColor: Color { Theme.color(for: band) }
+
     var body: some View {
         VStack(spacing: 28) {
-            // Score Gauge
+            // Score gauge
             ZStack {
-                // Track
                 Circle()
-                    .stroke(bandColor.opacity(0.10), lineWidth: 14)
-                
-                // Fill ring
+                    .stroke(bandColor.opacity(0.14), lineWidth: 14)
+
                 Circle()
                     .trim(from: 0, to: animatedProgress)
                     .stroke(
-                        bandGradient,
+                        Theme.gradient(for: band),
                         style: StrokeStyle(lineWidth: 14, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))
-                
-                // Score text
+
                 VStack(spacing: 2) {
                     Text("\(animatedScore)")
                         .font(.system(size: 56, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color(uiColor: .label))
+                        .foregroundStyle(Theme.textPrimary)
                         .contentTransition(.numericText())
-                    
+
                     Text(band.rawValue.uppercased())
                         .font(.system(size: 12, weight: .heavy, design: .rounded))
                         .tracking(1.6)
@@ -86,18 +46,19 @@ struct ReadinessHeroView: View {
                 }
             }
             .frame(width: 180, height: 180)
-            
-            // Recommendation
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Readiness score")
+            .accessibilityValue("\(score) out of 100, \(band.rawValue)")
+
             VStack(spacing: 10) {
                 Text(result.recommendation)
                     .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundStyle(Color(uiColor: .secondaryLabel))
+                    .foregroundStyle(Theme.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(3)
                     .padding(.horizontal, 8)
-                
-                // Recency pill
-                if let recencyNote = recencyNote {
+
+                if let recencyNote {
                     HStack(spacing: 5) {
                         Image(systemName: "clock")
                             .font(.system(size: 10, weight: .semibold))
@@ -107,7 +68,7 @@ struct ReadinessHeroView: View {
                     .foregroundStyle(bandColor)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 5)
-                    .background(bandAccentLight)
+                    .background(bandColor.opacity(0.12))
                     .clipShape(Capsule())
                 }
             }
@@ -115,9 +76,7 @@ struct ReadinessHeroView: View {
         .padding(.vertical, 32)
         .padding(.horizontal, 24)
         .frame(maxWidth: .infinity)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.04), radius: 10, x: 0, y: 4)
+        .orivCard()
         .onAppear {
             withAnimation(.easeOut(duration: 1.0)) {
                 animatedProgress = CGFloat(score) / 100.0
@@ -136,41 +95,33 @@ struct ReadinessHeroView: View {
     }
 }
 
-// MARK: - Insufficient Data Hero
+#Preview("Ready") {
+    ReadinessHeroView(
+        result: ReadinessResult(
+            score: 88,
+            band: .ready,
+            breakdown: [],
+            recommendation: "You're well recovered. Heavy training and high intensity work are fair game today.",
+            status: .scored
+        ),
+        recencyNote: nil
+    )
+    .padding()
+    .background(Theme.canvas)
+}
 
-struct InsufficientDataHeroView: View {
-    let recommendation: String
-    
-    var body: some View {
-        VStack(spacing: 20) {
-            ZStack {
-                Circle()
-                    .stroke(Color.orange.opacity(0.12), lineWidth: 14)
-                    .frame(width: 140, height: 140)
-                
-                Image(systemName: "waveform.path.ecg")
-                    .font(.system(size: 38, weight: .medium))
-                    .foregroundStyle(Color.orange.opacity(0.7))
-            }
-            
-            VStack(spacing: 8) {
-                Text("Building Your Baseline")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(uiColor: .label))
-                
-                Text(recommendation)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(Color(uiColor: .tertiaryLabel))
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(3)
-                    .padding(.horizontal, 12)
-            }
-        }
-        .padding(.vertical, 36)
-        .padding(.horizontal, 24)
-        .frame(maxWidth: .infinity)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.04), radius: 10, x: 0, y: 4)
-    }
+#Preview("Poor — dark") {
+    ReadinessHeroView(
+        result: ReadinessResult(
+            score: 31,
+            band: .poor,
+            breakdown: [],
+            recommendation: "Recovery is poor. Prioritize rest, sleep, and light movement today.",
+            status: .scored
+        ),
+        recencyNote: "Based on Sleep from September 7"
+    )
+    .padding()
+    .background(Theme.canvas)
+    .preferredColorScheme(.dark)
 }
